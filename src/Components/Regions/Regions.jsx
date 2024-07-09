@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import RegionsItem from './RegionsItem'
 
-const Regions = ( {countryNameSearch,languageValue} ) => {
+const Regions = ( {countryNameSearch,languageValue,regionValue} ) => {
     const [data,setData] = useState(null)
 
     useEffect(() => {
@@ -17,7 +17,7 @@ const Regions = ( {countryNameSearch,languageValue} ) => {
     
   return (
     <div className='pt-8 bg-gray-400'>
-        <RegionsItem dataRegions={data} countryNameSearch={countryNameSearch} languageValue={languageValue}/>
+        <RegionsItem dataRegions={data} countryNameSearch={countryNameSearch} languageValue={languageValue} regionValue={regionValue}/>
     </div>
   )
 }

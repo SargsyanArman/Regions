@@ -1,18 +1,33 @@
-import React, { useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import RegionInfo from './RegionInfo';
+import { Button } from 'antd';
+import { Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 
-const RegionsItem = ({ dataRegions, countryNameSearch ,languageValue }) => {
+const RegionsItem = ({ dataRegions, countryNameSearch, languageValue, regionValue }) => {
     const [index, setIndex] = useState(0);
     const itemsPerPage = 10;
+    
+    const filteredItems = useMemo(() => {
+        if (!dataRegions) return [];
 
+        console.log('update');
+        return dataRegions.filter(item => {
+            const matchByLanguage = item.languages && Object.values(item.languages)[0].toLowerCase().includes(languageValue.toLowerCase());
+            const matchByCountryName = item.name.common.toLowerCase().includes(countryNameSearch.toLowerCase());
+            const matchByRegion = item.region.toLowerCase().includes(regionValue.toLowerCase());
+            return matchByCountryName && matchByLanguage && matchByRegion;
+        });
+    }, [dataRegions, languageValue, regionValue, countryNameSearch]);
+    
     if (!dataRegions) {
-        return <p>Loading...</p>;
+        return (
+            <div className="loading-container flex justify-center">
+                <Spin indicator={<LoadingOutlined spin />} size="large" />
+            </div>
+        );
     }
-console.log(languageValue);
-    const filteredItems = dataRegions.filter(item =>
-        item.name.common.toLowerCase().includes(countryNameSearch.toLowerCase())
-    );
-
+    
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
     const startIndex = index * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -26,7 +41,7 @@ console.log(languageValue);
         setIndex((index + 1) % totalPages);
     };
 
-    const infoRegion = ['Flag', 'Country', 'Capital', 'Region', 'Subregion', 'Language', 'Independent', 'Area'];
+    const infoRegion = ['Flag', 'Country', 'Capital', 'Region', 'Currency', 'Language', 'Independent', 'Area'];
 
     return (
         <div className='flex flex-col items-center'>
@@ -40,8 +55,10 @@ console.log(languageValue);
                             <img src={item.flags.png} alt={item.capital} className='w-[50px] h-[30px] flex-shrink-0' />
                             <span className='flex-1 text-center ml-14 mr-[13px]'>{item.name.common}</span>
                             <span className='flex-1 text-center'>{item.capital}</span>
-                            <span className='flex-1 text-center'>{item.continents}</span>
-                            <span className='flex-1 text-center'>{item.subregion}</span>
+                            <span className='flex-1 text-center'>{item.continents.join(' ')}</span>
+                            <span className='flex-1 text-center'>
+                                {item.currencies && [(Object.values(item.currencies)[0].name), Object.values(item.currencies)[0].symbol].join(" ")}
+                            </span>
                             <span className='flex-1 text-center'>{item.languages && Object.values(item.languages)[0]}</span>
                             <span className='flex-1 text-center'>{item.independent ? 'Yes' : 'No'}</span>
                             <span className='flex-1 text-center'>{item.area}</span>
@@ -49,22 +66,23 @@ console.log(languageValue);
                     ))}
                 </ul>
             </div>
-            <div className='flex justify-between mt-4 mb-4'>
-                <button 
-                    className='bg-gray-300 p-2 rounded-md mr-4 disabled:opacity-50' 
-                    onClick={handlePrev} 
+            <div className='flex justify-between my-4'>
+                <Button
+                    onClick={handlePrev}
                     disabled={index === 0}
                 >
                     Prev
-                </button>
-                <span className='text-lg font-bold pt-2'>{index + 1}</span>
-                <button 
-                    className='bg-gray-300 p-2 rounded-md ml-4 disabled:opacity-50' 
-                    onClick={handleNext} 
+                </Button>
+                <span className='text-lg font-bold mx-4'>{index + 1}</span>
+
+                <Button type="primary"
+                    onClick={handleNext}
                     disabled={totalPages - 1 === index}
+                    block
+                    className='w-[100px]'
                 >
-                    Next
-                </button>
+                    NEXT
+                </Button>
             </div>
         </div>
     );
